@@ -1,8 +1,8 @@
 # Mosaic Photo Generator
 
-This program generates a mosaic photo based on a bunch of tile images (from a specific folder).
+This program generates a mosaic photo from a folder of tile images.
 
-Basically, it calculates the average RGB color of each tile and compares it to the average RGB of each section of the original image. It then puts all the matched tiles in a list and builds a new photo based on those matches.
+It computes the average RGB color of each tile, splits the target image into a grid, and fills each cell with the closest-matching tile (optionally in CIE Lab color space for perceptually-better matches). Matching is fully vectorized with numpy, so even a 150×150 grid against a few hundred tiles finishes in a couple of seconds.
 
 ## Installation
 
@@ -28,61 +28,135 @@ This project uses [uv](https://docs.astral.sh/uv/) for Python and dependency man
    uv sync
    ```
 
-   `uv` will fetch the pinned Python interpreter (if needed), create `.venv/`, and install the locked versions of `numpy` and `Pillow`.
+   `uv` will fetch the pinned Python interpreter (if needed), create `.venv/`, and install the locked versions of `numpy` and `Pillow`. The project is also installed in editable mode, which exposes the `mosaic` console script.
 
 ## Usage
 
-1. Make sure the folder for tile images only contains image files and that their extensions are `.jpg` or `.jpeg`. You can convert any other extensions to `.jpg` by running `Convert_Images_To_JPG.py`.
+The package exposes a single CLI entry point, `mosaic`, with two subcommands.
 
-   ```python
-   if __name__ == '__main__':
-       convert_tile_extension_to_jpg(directory_path='../Assets/Trees/')
-   ```
+### Generate a mosaic
 
-   Run it with:
+```bash
+uv run mosaic build <target_image> <tiles_directory> [options]
+```
 
-   ```bash
-   cd scripts
-   uv run python Convert_Images_To_JPG.py
-   ```
+Example:
 
-2. Adjust the output mosaic photo by configuring these parameters in the `generate_mosaic_photo()` function in main.
+```bash
+uv run mosaic build Assets/Tree.jpg Assets/Trees/ \
+    --output Result.jpg \
+    --grid 150 150 \
+    --scale 5 \
+    --color-mode RGB \
+    --color-space rgb
+```
 
-   ```python
-   if __name__ == '__main__':
-       generate_mosaic_photo(target_image='../Assets/Tree.jpg',
-                             tiles_path='../Assets/Trees/',
-                             output_filename='Result.jpg',
-                             scale=5,
-                             grid_size=(150, 150),
-                             duplicated_tile=True,
-                             color_mode='RGB')
-   ```
+Options for `build`:
 
-   Breakdown:
-   - `target_image`: path to the image you want to turn into a mosaic.
-   - `tiles_path`: path to the folder of tile images.
-   - `output_filename`: path for the generated mosaic photo.
-   - `scale`: zoom level of the image after it's converted.
-   - `grid_size`: determines how many times you want to split the original image.
-   - `duplicated_tile`: whether the program can use a tile image multiple times or not (if set to false, make sure you have enough unique tiles in the folder to fill the `grid_size`).
-   - `color_mode`: `'RGB'` for color, `'L'` for grayscale.
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--output PATH` | `Result.jpg` | Output path. Format inferred from extension (`.jpg` or `.png`). |
+| `--grid ROWS COLS` | `150 150` | Number of cells vertically (rows) and horizontally (cols). |
+| `--scale FLOAT` | `3.0` | Multiplier applied to the target's resolution before splitting. Larger = more pixels per cell. |
+| `--color-mode {RGB,L}` | `RGB` | `RGB` for color, `L` for grayscale. |
+| `--color-space {rgb,lab}` | `rgb` | `rgb` is fast; `lab` is perceptually closer (CIE Lab / ΔE76). |
+| `--no-duplicates` | (off) | Use each tile at most once. Requires at least `ROWS*COLS` tiles. |
+| `--jpeg-quality INT` | `90` | JPEG encoder quality (1-95) when output is JPEG. |
+| `--seed INT` | (random) | RNG seed for reproducible runs. |
+| `-v` / `-q` | | Verbose (DEBUG) or quiet (WARNING+) logging. |
 
-3. Run `Mosaic_Photo_Generator.py` (paths in the script are relative to `scripts/`, so run it from there):
+Run `uv run mosaic build --help` for the full list.
 
-   ```bash
-   cd scripts
-   uv run python Mosaic_Photo_Generator.py
-   ```
+### Re-encode a folder of images as JPEG
 
-## Managing dependencies
+The tile folder must contain only images PIL can decode. The `convert` subcommand decodes each file and re-encodes it as a real JPEG (unlike the legacy script, which only renamed extensions):
 
-- Add a dependency: `uv add <package>`
+```bash
+uv run mosaic convert <directory> [--quality 90] [--rename-sequentially]
+```
+
+- `--quality`: JPEG encoder quality (1-95, default 90).
+- `--rename-sequentially`: Rename outputs to `0.jpg`, `1.jpg`, ... in processing order, matching the legacy behavior.
+
+Files that aren't recognized as images are left in place; transparent PNGs are flattened onto a white background; existing JPEGs are left untouched unless `--rename-sequentially` is set.
+
+## Library API
+
+If you'd rather call the generator from Python, the public API is two symbols:
+
+```python
+from mosaic import MosaicConfig, generate_mosaic_photo
+
+config = MosaicConfig(
+    target_image="Assets/Tree.jpg",
+    tiles_path="Assets/Trees/",
+    grid_size=(150, 150),    # (rows, cols)
+    output_filename="Result.jpg",
+    scale=5.0,
+    duplicated_tile=True,
+    color_mode="RGB",        # "RGB" | "L"
+    color_space="rgb",       # "rgb" | "lab"
+    seed=0,                  # optional, makes runs reproducible
+)
+generate_mosaic_photo(config)
+```
+
+`MosaicConfig` is a frozen dataclass and validates all parameters in `__post_init__`.
+
+## Development
+
+Set up dev dependencies (`pytest`, `ruff`):
+
+```bash
+uv sync
+```
+
+Run the test suite:
+
+```bash
+uv run pytest
+```
+
+Run the linter / formatter:
+
+```bash
+uv run ruff check src tests
+uv run ruff format src tests
+```
+
+CI runs both on every push and pull request against `master`/`main` (see `.github/workflows/ci.yml`).
+
+### Managing dependencies
+
+- Add a runtime dependency: `uv add <package>`
+- Add a dev-only dependency: `uv add --dev <package>`
 - Remove a dependency: `uv remove <package>`
 - Refresh the lock file: `uv lock`
 - Re-sync the environment to match the lock file: `uv sync`
 
+## Project layout
+
+```
+.
+├── pyproject.toml          # project metadata, deps, ruff/pytest config
+├── uv.lock                 # locked dependency versions
+├── uv.toml                 # project-local uv config (pins index to PyPI)
+├── .python-version         # pinned interpreter version
+├── src/
+│   └── mosaic/
+│       ├── __init__.py     # exports MosaicConfig, generate_mosaic_photo
+│       ├── cli.py          # `mosaic` console-script entry point
+│       ├── core.py         # MosaicConfig + top-level pipeline
+│       ├── tiles.py        # tile loading and average-RGB
+│       ├── matching.py     # vectorized matching (RGB / Lab)
+│       ├── compose.py      # split target / paste tiles back into a grid
+│       └── convert.py      # JPEG re-encoding (`mosaic convert`)
+├── tests/                  # pytest suite (~100 tests)
+└── Assets/                 # sample target/tiles (gitignored, not shipped)
+```
+
 ## Result
+
 Click on the image and zoom in to check out the individual tile images.
 
 ![alt text](https://github.com/Charlotte-Miller/Multimedia_Project_Mosaic_Photo/blob/master/scripts/Result.jpg?raw=true)

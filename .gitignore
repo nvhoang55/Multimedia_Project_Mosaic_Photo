@@ -1,5 +1,9 @@
+# Sample inputs and the empty scripts dir from the legacy layout.
 /Assets/
-/scripts/Result.jpg
+/scripts/
+
+# Generated mosaic output (default filename).
+Result.jpg
 
 # Virtual environments
 /CBVs/
@@ -10,3 +14,20 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Build / packaging artifacts
+*.egg-info/
+/build/
+/dist/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Editor / OS junk
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,19 @@
+# Project-local uv configuration.
+#
+# This file pins the package index to public PyPI so that `uv sync` works on
+# any machine, regardless of whether the user's global ~/.config/uv/uv.toml
+# points at a private CodeArtifact (or other authenticated) index.
+#
+# Without this file, `uv` merges the user-level config and inherits any
+# `[[index]]` entries declared there. If a contributor has a private index
+# whose credentials have expired, resolution fails with a 401 even though
+# every dependency is publicly available on PyPI.
+#
+# Keep this file minimal. If you ever need to add a private mirror for this
+# project specifically, declare it here as a non-default index and let PyPI
+# remain the default.
+
+[[index]]
+name = "pypi"
+url = "https://pypi.org/simple/"
+default = true
