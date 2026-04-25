@@ -1,15 +1,15 @@
 # Mosaic Photo Generator
 
-The program is made to generate a mosaic photo base on bunches of tile image. (specific from a folder)
+This program generates a mosaic photo based on a bunch of tile images (from a specific folder).
 
-Briefly, it uses average RGB color of each tiles image, compare to the average RGB of each split image (from original image). After that, put all the matched tile in a list then start creating a photo base on these matched images.
+Basically, it calculates the average RGB color of each tile and compares it to the average RGB of each section of the original image. It then puts all the matched tiles in a list and builds a new photo based on those matches.
 
 ## Installation
 Python version: 3.8.7
 
 PIP version: 21.0
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install following packages.
+Use the package manager [pip](https://pip.pypa.io/en/stable/) to install these packages.
 
 ```bash
 python3 -m pip install --upgrade pip
@@ -18,16 +18,14 @@ python3 -m pip install --upgrade Pillow
 ```
 
 ## Usage
-1. Make sure folder to tiles image only contain image file and these files extension is .jpg or .jpeg. Convert all other image extension to .jpg by executing Convert_Images_To_JPG.py
+1. Make sure the folder for tile images only contains image files and that their extensions are .jpg or .jpeg. You can convert any other extensions to .jpg by running `Convert_Images_To_JPG.py`.
 
 ```python
 if __name__ == '__main__':
     convert_tile_extension_to_jpg(directory_path='../data/Face/')
 ```
 
-
-
-2. Adjust the output mosaic photo by configuring these parameters of the generate_mosaic_photo() function in main.
+2. Adjust the output mosaic photo by configuring these parameters in the `generate_mosaic_photo()` function in main.
 
 ```python
 if __name__ == '__main__':
@@ -39,18 +37,18 @@ if __name__ == '__main__':
                           duplicated_tile=True,
                           color_mode='RGB')
 ```
-Explain:
-- target_image: path to the image which is used to make a mosaic photo.
-- tiles_path: path to the directory of tile images.
-- output_filename: path to the generated mosaic photo.
-- scale: zoom level of the image after converting to the mosaic photo.
-- grid_size: determine how many times you want to split the original image.
-- duplicated_tile: allowing the program to use a tile image multiple time or not(otherwise, you have to make sure there's enough of tile image in the tiles folder fit up the grid_size).
-- color_mode: 'RGB' for colorful, 'L' for grayscale
+Breakdown:
+- target_image: path to the image you want to turn into a mosaic.
+- tiles_path: path to the folder of tile images.
+- output_filename: path for the generated mosaic photo.
+- scale: zoom level of the image after it's converted.
+- grid_size: determines how many times you want to split the original image.
+- duplicated_tile: whether the program can use a tile image multiple times or not (if set to false, make sure you have enough unique tiles in the folder to fill the grid_size).
+- color_mode: 'RGB' for color, 'L' for grayscale.
 
-3. Execute Mosaic_Photo_Generator.py
+3. Run `Mosaic_Photo_Generator.py`
 
 ## Result
-Click in the image then zoom out to check out its tile images
+Click on the image and zoom in to check out the individual tile images.
 
 ![alt text](https://github.com/Charlotte-Miller/Multimedia_Project_Mosaic_Photo/blob/master/scripts/Result.jpg?raw=true)
