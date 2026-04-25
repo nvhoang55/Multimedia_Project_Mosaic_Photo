@@ -1,6 +1,5 @@
-# Sample inputs and the empty scripts dir from the legacy layout.
+# Sample inputs.
 /Assets/
-/scripts/
 
 # Generated mosaic output (default filename).
 Result.jpg

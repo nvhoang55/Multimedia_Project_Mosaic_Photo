@@ -159,4 +159,4 @@ CI runs both on every push and pull request against `master`/`main` (see `.githu
 
 Click on the image and zoom in to check out the individual tile images.
 
-![alt text](https://github.com/Charlotte-Miller/Multimedia_Project_Mosaic_Photo/blob/master/scripts/Result.jpg?raw=true)
+![demo mosaic](demo.jpg)
