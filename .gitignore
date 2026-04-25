@@ -1,2 +1,12 @@
 /Assets/
 /scripts/Result.jpg
+
+# Virtual environments
+/CBVs/
+/.venv/
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

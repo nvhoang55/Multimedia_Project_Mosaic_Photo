@@ -1,0 +1,10 @@
+[project]
+name = "mosaic-photo-generator"
+version = "0.1.0"
+description = "Photo mosaic generator: tiles a target image with closest-RGB-match thumbnails."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=2.0",
+    "pillow>=10.0",
+]
