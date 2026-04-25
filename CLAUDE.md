@@ -103,7 +103,7 @@ The pipeline (`build_mosaic`) is:
 - `uv.toml` — project-local uv config that pins the index to public PyPI.
 - `.python-version` — pinned interpreter (currently 3.12).
 - `.venv/` — local virtual environment created by `uv sync` (gitignored).
-- `.github/workflows/ci.yml` — runs ruff + pytest on Python 3.10, 3.11, and 3.12 on every push and PR against `master`/`main`.
+- `.github/workflows/ci.yml` — runs ruff + pytest on the pinned interpreter (read from `.python-version`) on every push and PR against `master`/`main`.
 
 ## Adding features
 
